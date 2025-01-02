@@ -1,8 +1,8 @@
-import "material-design-icons-iconfont/dist/material-design-icons.css"; // Ensure your project is capable of handling css files
+import "@mdi/font/css/materialdesignicons.css"; // Ensure you are using css-loader
 import { createVuetify } from "vuetify";
 import * as components from "vuetify/components";
 import * as directives from "vuetify/directives";
-import { aliases, md } from "vuetify/iconsets/md";
+import { aliases, mdi } from "vuetify/iconsets/mdi";
 import "vuetify/styles";
 
 const customeTheme = {
@@ -43,10 +43,10 @@ const vuetify = createVuetify({
         },
     },
     icons: {
-        defaultSet: "md",
+        defaultSet: "mdi",
         aliases,
         sets: {
-            md,
+            mdi,
         },
     },
 });

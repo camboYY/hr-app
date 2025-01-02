@@ -18,8 +18,8 @@ Route::group([
     
 });
 
-Route::group(['middleware'=>'api','prefix'=> 'common'], function ($router) {
-    Route::middleware(['auth:api'])->group(function ($router) {
+Route::group(['middleware'=>'api','prefix'=> 'common'], function () {
+    Route::middleware(['auth:api'])->group(function () {
         Route::get('/department', [DepartmentController::class,"index"]);
         Route::post('/department', [DepartmentController::class,"store"]);
         Route::get('/department/{id}/edit', [DepartmentController::class,"edit"]);

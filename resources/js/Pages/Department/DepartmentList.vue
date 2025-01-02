@@ -34,7 +34,6 @@
                                         ></v-divider>
                                         <v-spacer></v-spacer>
                                         <v-btn
-                                            color="primary"
                                             @click="
                                                 () =>
                                                     $router.push({
@@ -46,31 +45,22 @@
                                         </v-btn>
                                     </v-toolbar>
                                 </template>
+
                                 <template v-slot:item.actions="{ item }">
                                     <v-icon
                                         small
                                         class="mr-2"
-                                        @click="
-                                            () =>
-                                                $router.push({
-                                                    name: 'department.edit',
-                                                    params: { id: item.id },
-                                                })
-                                        "
+                                        @click="onEditDepartment(item)"
                                     >
                                         mdi-pencil
                                     </v-icon>
                                     <v-icon
                                         small
                                         @click="
-                                            () =>
-                                                $router.push({
-                                                    name: 'department.show',
-                                                    params: { id: item.id },
-                                                })
+                                            onConfirmDeleteDepartment(item.id)
                                         "
                                     >
-                                        mdi-eye
+                                        mdi-delete
                                     </v-icon>
                                 </template>
                             </v-data-table-server>
@@ -78,16 +68,25 @@
                     </v-card>
                 </v-col>
             </v-row>
+            <ConfirmationDialog
+                :dialog="dialog"
+                title="Confirmation"
+                message="Are you sure wanted to delete this item?"
+                :onConfirm="onDeleteDepartment"
+                :onCancel="() => (dialog = false)"
+            />
         </v-container>
     </div>
 </template>
 
 <script>
+import ConfirmationDialog from "@/components/ConfirmationDialog.vue";
 import { mapActions, mapGetters } from "vuex";
-
 export default {
     data: () => ({
         loading: false,
+        dialog: false,
+        id: null,
         headers: [
             { title: "ID", key: "id" },
             { title: "Name", key: "name" },
@@ -97,27 +96,25 @@ export default {
                 title: "Actions",
                 key: "actions",
                 sortable: false,
-                key: "light",
             },
         ],
     }),
+    components: {
+        ConfirmationDialog,
+    },
     computed: {
         ...mapGetters("Department", ["departments"]),
     },
     async mounted() {
-        try {
-            this.loading = true;
-            await this.fetchDepartments();
-        } catch (error) {
-            console.log(error);
-        } finally {
-            this.loading = false;
-        }
+        await this.fetchDepartmentAgain();
     },
     methods: {
-        ...mapActions("Department", ["fetchDepartments"]),
+        ...mapActions("Department", [
+            "fetchDepartments",
+            "setDepartment",
+            "deleteDepartment",
+        ]),
         async fetchDepartmentAgain() {
-            console.log("fetching department again");
             try {
                 this.loading = true;
                 await this.fetchDepartments();
@@ -127,8 +124,28 @@ export default {
                 this.loading = false;
             }
         },
+        onEditDepartment(department) {
+            this.setDepartment(department);
+            this.$router.push({
+                name: "department.edit",
+                params: { id: department.id },
+            });
+        },
+        onConfirmDeleteDepartment(id) {
+            this.dialog = true;
+            this.id = id;
+        },
+
+        async onDeleteDepartment() {
+            this.dialog = false;
+            await this.deleteDepartment(this.id);
+        },
     },
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.title {
+    color: #fff;
+}
+</style>

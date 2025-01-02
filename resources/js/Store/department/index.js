@@ -3,6 +3,7 @@ import { baseUrl } from "../apiEnv";
 const DepartmentStore = {
     namespaced: true,
     state: () => ({
+        department: {},
         departments: {
             data: [],
             current_page: 1,
@@ -13,11 +14,43 @@ const DepartmentStore = {
     }),
     mutations: {
         SET_DEPARTMENTS(state, departments) {
-            console.log(departments.data);
-            state.departments.data = departments.data;
+            state.departments = departments;
+        },
+        SET_DEPARTMENT(state, department) {
+            state.department = department;
         },
     },
     actions: {
+        setDepartment({ commit }, department) {
+            commit("SET_DEPARTMENT", department);
+        },
+        async deleteDepartment({ dispatch }, id) {
+            await axios.delete(`${baseUrl}common/department/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                        "access_token"
+                    )}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            dispatch("fetchDepartments");
+        },
+        async editDepartment({ dispatch }, department) {
+            const { id, name, description } = department;
+            await axios.put(
+                `${baseUrl}common/department/${id}`,
+                { name, description },
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "access_token"
+                        )}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            dispatch("fetchDepartments");
+        },
         async fetchDepartments({ commit }) {
             const { data } = await axios.get(`${baseUrl}common/department`, {
                 headers: {
@@ -43,6 +76,7 @@ const DepartmentStore = {
     },
     getters: {
         departments: (state) => state.departments,
+        department: (state) => state.department,
     },
 };
 

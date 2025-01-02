@@ -5,10 +5,10 @@
                 <v-col cols="12" md="6" offset-md="3">
                     <v-card>
                         <v-card-title>
-                            <h2>Create Department</h2>
+                            <h2>Edit Department</h2>
                         </v-card-title>
                         <v-card-text>
-                            <v-form class="flex" @submit.prevent="createDept">
+                            <v-form class="flex" @submit.prevent="editDept">
                                 <v-text-field
                                     v-model="name"
                                     :rules="nameRules"
@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 
 export default {
     data: () => ({
@@ -57,16 +57,20 @@ export default {
         ],
         description: "",
     }),
-
+    computed: {
+        ...mapGetters("Department", ["department"]),
+    },
     methods: {
-        ...mapActions("Department", ["createDepartment"]),
-        async createDept() {
+        ...mapActions("Department", ["editDepartment"]),
+        async editDept() {
             try {
                 this.loading = true;
-                await this.createDepartment({
+                await this.editDepartment({
+                    ...this.department,
                     name: this.name,
                     description: this.description,
                 });
+
                 this.$router.push({ name: "department.list" });
             } catch (e) {
                 console.log(e);

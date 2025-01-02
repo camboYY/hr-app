@@ -26,6 +26,11 @@ const routes = [
         name: "department.create",
     },
     {
+        path: "/department/edit/:id",
+        component: async () => import("../Pages/Department/DepartmentEdit.vue"),
+        name: "department.edit",
+    },
+    {
         path: "/:pathMatch(.*)*",
         component: () => import("../Pages/NotFound.vue"),
     },
