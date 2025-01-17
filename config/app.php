@@ -27,6 +27,8 @@ return [
     */
 
     'env' => env('APP_ENV', 'production'),
+    'base_url'=>env('AWS_URL',"http://localhost"),
+    'bucket_name'=>env('AWS_BUCKET',''),
 
     /*
     |--------------------------------------------------------------------------

@@ -43,8 +43,8 @@ export default {
         items: [
             { title: "Dashboard", path: "/dashboard" },
             { title: "Department", path: "/department/list" },
-            { title: "Designation", path: "/designation" },
-            { title: "Employee", path: "/employee" },
+            { title: "Designation", path: "/designation/list" },
+            { title: "Employee", path: "/employee/list" },
             { title: "Contract", path: "/contract" },
             { title: "About", path: "/about" },
             { title: "Logout", path: "/login" },

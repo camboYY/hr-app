@@ -13,10 +13,10 @@ class DesignationController extends Controller
         if( $request->has('query') ) {
             $query->where('name','like','%'.$request->get('query').'%');
         }
-        $query->paginate(10);
-        $designations = $query->get();
+        
+        $designations = $query->paginate(perPage: 10);
 
-        return response()->json($designations);
+        return response()->json(compact('designations'),200);
     }
 
     public function store(Request $request) {
@@ -44,7 +44,7 @@ class DesignationController extends Controller
     public function update(Request $request, $id) { 
         $request->validate([
             'name' => 'required',
-            'responsibilities' => 'required',
+            'responsibilities' => 'nullable',
             'contract_id' => 'nullable',
         ]);
 

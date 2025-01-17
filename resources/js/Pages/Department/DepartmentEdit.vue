@@ -1,36 +1,44 @@
 <template>
     <div>
         <v-container>
-            <v-row>
-                <v-col cols="12" md="6" offset-md="3">
-                    <v-card>
-                        <v-card-title>
-                            <h2>Edit Department</h2>
-                        </v-card-title>
-                        <v-card-text>
-                            <v-form class="flex" @submit.prevent="editDept">
-                                <v-text-field
-                                    v-model="name"
-                                    :rules="nameRules"
-                                    label="Name"
-                                    required
-                                ></v-text-field>
-                                <v-text-field
-                                    v-model="description"
-                                    label="Description"
-                                ></v-text-field>
-                                <v-btn
-                                    :loading="loading"
-                                    color="primary"
-                                    type="submit"
-                                >
-                                    Save
-                                </v-btn>
-                            </v-form>
-                        </v-card-text>
-                    </v-card>
-                </v-col>
-            </v-row>
+            <v-col cols="12">
+                <v-card>
+                    <v-card-title>
+                        <h2>Edit Department</h2>
+                    </v-card-title>
+                    <v-card-text>
+                        <v-form @submit.prevent="editDept">
+                            <v-row>
+                                <v-col cols="12" md="6">
+                                    <v-text-field
+                                        v-model="name"
+                                        :rules="nameRules"
+                                        label="Name"
+                                        required
+                                    ></v-text-field>
+                                </v-col>
+                                <v-col cols="12" md="6">
+                                    <v-text-field
+                                        v-model="description"
+                                        label="Description"
+                                    ></v-text-field>
+                                </v-col>
+                            </v-row>
+                            <v-row>
+                                <v-col cols="12">
+                                    <v-btn
+                                        :loading="loading"
+                                        color="primary"
+                                        type="submit"
+                                    >
+                                        Update
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
+                        </v-form>
+                    </v-card-text>
+                </v-card>
+            </v-col>
         </v-container>
     </div>
 </template>

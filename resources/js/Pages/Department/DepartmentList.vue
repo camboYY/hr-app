@@ -5,13 +5,31 @@
                 <v-col cols="12">
                     <v-card>
                         <v-card-title>
-                            <h3>Department List</h3>
+                            <v-row>
+                                <v-col cols="6">
+                                    <h3 class="text-h5">Department List</h3>
+                                </v-col>
+                                <v-col cols="6" class="text-right">
+                                    <v-btn
+                                        color="primary"
+                                        @click="
+                                            () =>
+                                                $router.push({
+                                                    name: 'department.create',
+                                                })
+                                        "
+                                    >
+                                        Add Department
+                                    </v-btn>
+                                </v-col>
+                            </v-row>
                         </v-card-title>
+
                         <v-card-text>
-                            <v-data-table-server
+                            <v-data-table
                                 v-model:items-per-page="departments.per_page"
                                 :headers="headers"
-                                :items="departments.data"
+                                :items="getDepartments"
                                 :loading="loading"
                                 item-key="id"
                                 @update:page="fetchDepartmentAgain"
@@ -22,40 +40,19 @@
                                         type="table-row@10"
                                     ></v-skeleton-loader>
                                 </template>
-                                <template v-slot:top>
-                                    <v-toolbar flat>
-                                        <v-toolbar-title
-                                            >Department List</v-toolbar-title
-                                        >
-                                        <v-divider
-                                            class="mx-4"
-                                            inset
-                                            vertical
-                                        ></v-divider>
-                                        <v-spacer></v-spacer>
-                                        <v-btn
-                                            @click="
-                                                () =>
-                                                    $router.push({
-                                                        name: 'department.create',
-                                                    })
-                                            "
-                                        >
-                                            Add Department
-                                        </v-btn>
-                                    </v-toolbar>
-                                </template>
 
                                 <template v-slot:item.actions="{ item }">
                                     <v-icon
                                         small
                                         class="mr-2"
+                                        color="primary"
                                         @click="onEditDepartment(item)"
                                     >
                                         mdi-pencil
                                     </v-icon>
                                     <v-icon
                                         small
+                                        color="error"
                                         @click="
                                             onConfirmDeleteDepartment(item.id)
                                         "
@@ -63,7 +60,7 @@
                                         mdi-delete
                                     </v-icon>
                                 </template>
-                            </v-data-table-server>
+                            </v-data-table>
                         </v-card-text>
                     </v-card>
                 </v-col>
@@ -81,7 +78,9 @@
 
 <script>
 import ConfirmationDialog from "@/components/ConfirmationDialog.vue";
+import moment from "moment";
 import { mapActions, mapGetters } from "vuex";
+
 export default {
     data: () => ({
         loading: false,
@@ -104,6 +103,18 @@ export default {
     },
     computed: {
         ...mapGetters("Department", ["departments"]),
+        getDepartments() {
+            return this.departments.data.map((item) => {
+                return {
+                    id: item.id,
+                    name: item.name,
+                    description: item.description,
+                    created_at: moment(item.created_at).format(
+                        "MMMM Do YYYY, h:mm:ss a"
+                    ),
+                };
+            });
+        },
     },
     async mounted() {
         await this.fetchDepartmentAgain();

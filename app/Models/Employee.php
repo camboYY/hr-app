@@ -13,10 +13,12 @@ class Employee extends Model
         'phoneNumber',
         'currentAddress',
         'nationalId',
-        'marriageStatus',
+        'maritalStatus',
         'dateOfBirth',
         'gender',
         'medicalCertificate',
+        'line_manager_id',
+        'designation_id'
     ];
 
 }

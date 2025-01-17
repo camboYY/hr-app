@@ -7,27 +7,47 @@
                         <v-text-field
                             v-model="email"
                             :counter="10"
-                            :rules="emailRules"
                             label="E-mail"
                             required
                         ></v-text-field>
+                        <div :class="{ error: v$.email.$errors.length }">
+                            <div
+                                class="input-errors"
+                                v-for="error of v$.email.$errors"
+                                :key="error.$uid"
+                            >
+                                <div class="text-error">
+                                    {{ error.$message }}
+                                </div>
+                            </div>
+                        </div>
                     </v-col>
 
                     <v-col cols="12" md="4">
                         <v-text-field
                             v-model="password"
                             :counter="10"
-                            :rules="passwordRules"
                             label="Password"
                             required
                         ></v-text-field>
+                        <div :class="{ error: v$.password.$errors.length }">
+                            <div
+                                class="input-errors"
+                                v-for="error of v$.password.$errors"
+                                :key="error.$uid"
+                            >
+                                <div class="text-error">
+                                    {{ error.$message }}
+                                </div>
+                            </div>
+                        </div>
                     </v-col>
                     <v-btn
                         @click="login"
                         :loading="loading"
-                        :disabled="!valid"
                         color="primary"
                         class="text-center btn"
+                        :disabled="loading"
                     >
                         Login
                     </v-btn>
@@ -38,45 +58,38 @@
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import { useVuelidate } from "@vuelidate/core";
+import { email, minLength, required } from "@vuelidate/validators";
+import { useRouter } from "vue-router";
+import { mapActions, useStore } from "vuex";
 
 export default {
+    setup() {
+        const router = useRouter();
+        const store = useStore();
+        const v$ = useVuelidate();
+        return { v$, store, router };
+    },
+
     data: () => ({
         loading: false,
-        valid: false,
         email: "",
-        emailRules: [
-            (value) => {
-                if (value) return true;
-
-                return "E-mail is required.";
-            },
-            (value) => {
-                if (/.+@.+\..+/.test(value)) return true;
-
-                return "E-mail must be valid.";
-            },
-        ],
         password: "",
-        passwordRules: [
-            (value) => {
-                if (value) return true;
-
-                return "Password is required.";
-            },
-            (value) => {
-                if (value?.length <= 10) return true;
-
-                return "Password must be less than 10 characters.";
-            },
-        ],
     }),
-    computed: {
-        ...mapState(["Auth"]),
+    validations() {
+        return {
+            email: { required, email },
+            password: { required, atLeast: minLength(5) },
+        };
     },
     methods: {
         ...mapActions("Auth", ["userLogin"]),
         async login() {
+            const result = await this.v$.$validate();
+            if (!result) {
+                // notify user form is invalid
+                return;
+            }
             try {
                 this.loading = true;
 
@@ -84,7 +97,7 @@ export default {
                     email: this.email,
                     password: this.password,
                 });
-                this.$router.push({ name: "about" });
+                this.router.push({ name: "about" });
             } catch (e) {
                 console.log(e);
             } finally {

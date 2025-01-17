@@ -8,14 +8,10 @@
                     max-width="400"
                     persistent
                 >
-                    <template v-slot:activator="{ props: activatorProps }">
-                        <v-btn v-bind="activatorProps"> Show Dialog </v-btn>
-                    </template>
-
                     <v-card
                         prepend-icon="mdi-alert-circle"
-                        text="Are you sure wanted to delete this item?"
-                        title="Confirmation"
+                        :text="message"
+                        :title="title"
                     >
                         <template v-slot:actions>
                             <v-spacer></v-spacer>

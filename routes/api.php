@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
+use App\Http\Controllers\EmployeeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
@@ -31,6 +32,14 @@ Route::group(['middleware'=>'api','prefix'=> 'common'], function () {
         Route::get('/designation/{id}/edit', [DesignationController::class,"edit"]);
         Route::put('/designation/{id}', [DesignationController::class,"update"]);
         Route::delete('/designation/{id}', [DesignationController::class,"destroy"]);
+
+        Route::post("/employee", [EmployeeController::class,"store"]);
+        Route::get( "/employee", [EmployeeController::class,"index"]);
+        Route::post("/employee/{id}",[EmployeeController::class,"update"]);
+        Route::delete("/employee/{id}",[EmployeeController::class,"destroy"]);
+        Route::get("/employee/{id}",[EmployeeController::class,"view"]);
+        Route::post("/employee/updatePhoto/{id}", [EmployeeController::class,"updateImage"]);
+
     });
 });
 

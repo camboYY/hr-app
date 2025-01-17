@@ -2,14 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreEmployeeRequest;
-use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 
 class EmployeeController extends Controller
 {
+
+    public function updateImage(Request $request, $id){
+        $employee = Employee::find($id);
+        if( $request->hasFile("nationalId") ) {
+            $photo = $request->file('nationalId');
+            $url = Storage::disk('s3')->put("public", $photo);
+            $employee->nationalId = Config::get('app.base_url')."/".Config::get("app.bucket_name")."/".$url;
+
+        } else if($request->hasFile("medicalCertificate")) {
+            $photo = $request->file("medicalCertificate");
+            $url = Storage::disk('s3')->put("public", $photo);
+            $employee->medicalCertificate = Config::get('app.base_url')."/".Config::get("app.bucket_name")."/".$url;
+        
+        }
+
+        $employee->save();
+        return response()->json($employee,200);
+    }
 
     public function index(Request $request)
     {
@@ -26,16 +43,42 @@ class EmployeeController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreEmployeeRequest $request)
+    public function store(Request $request)
     {
-        return response()->json(Employee::create($request->all()),201);
+       
+        $employee = new Employee();
+        $employee->firstName = $request->get("firstName");
+        $employee->lastName = $request->get("lastName");
+        $employee->middleName = $request->get("middleName");
+        $employee->phoneNumber = $request->get("phoneNumber");
+        $employee->currentAddress = $request->get("currentAddress");
+        $employee->designation_id = $request->get("designation_id");
+        $employee->line_manager_id = $request->get("line_manager_id");
+        if( $request->hasFile("nationalId") ) {
+            $photo = $request->file('nationalId');
+            $url = Storage::disk('s3')->put("public", $photo);
+            $employee->nationalId = Config::get('app.base_url')."/".Config::get("app.bucket_name")."/".$url;
+
+        }
+        $employee->maritalStatus = $request->get("maritalStatus");
+        $employee->dateOfBirth = $request->get("dateOfBirth");
+        $employee->gender = $request->get("gender");
+
+        if($request->hasFile("medicalCertificate")) {
+            $photo = $request->file("medicalCertificate");
+            $url = Storage::disk('s3')->put("public", $photo);
+            $employee->medicalCertificate = Config::get('app.base_url')."/".Config::get("app.bucket_name")."/".$url;
+        }
+        $employee->save();
+
+        return response()->json($employee,201);
     }
     
 
-    /**
+    /**cd
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function view($id)
     {
         return response()->json(Employee::findOrFail($id));
     }
@@ -43,23 +86,33 @@ class EmployeeController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateEmployeeRequest $request, $id)
+    public function update(Request $request, $id)
     {
         $employee = Employee::findOrFail($id);
-        $employee->firstName = $request->get("first_name");
-        $employee->lastName = $request->get("last_name");
-        $employee->email = $request->get("email");
-        $employee->phoneNumber = $request->get("phone");
-        $employee->currentAddress = $request->get("current_address");
-        if( $request->hasFile("national_id") ) {
-           $employee->nationalId = Storage::disk()->put("public", $request->get("national_id"));
+        $employee->firstName = $request->get("firstName");
+        $employee->lastName = $request->get("lastName");
+        $employee->middleName = $request->get("middleName");
+        $employee->phoneNumber = $request->get("phoneNumber");
+        $employee->currentAddress = $request->get("currentAddress");
+        $employee->designation_id = $request->get("designation_id");
+        $employee->line_manager_id = $request->get("line_manager_id");
+        if( $request->hasFile("nationalId") ) {
+
+            $photo = $request->file('nationalId');
+            $url = Storage::disk('s3')->put("public", $photo);
+            $employee->nationalId = Config::get('app.base_url')."/".Config::get("app.bucket_name")."/".$url;
+
         }
-        $employee->marriageStatus = $request->get("marriage_status");
-        $employee->dateOfBirth = $request->get("date_of_birth");
+        $employee->maritalStatus = $request->get("maritalStatus");
+        $employee->dateOfBirth = $request->get("dateOfBirth");
         $employee->gender = $request->get("gender");
-        if( $request->hasFile("medical_certificate") ) {
-            $employee->medicalCertificate = Storage::disk()->put("public", $request->get("medical_certificate")) ;
+
+        if($request->hasFile("medicalCertificate")) {
+            $photo = $request->file("medicalCertificate");
+            $url = Storage::disk('s3')->put("public", $photo);
+            $employee->medicalCertificate = Config::get('app.base_url')."/".Config::get("app.bucket_name")."/".$url;
         }
+        $employee->save();
         return response()->json($employee,200);
     }
 
