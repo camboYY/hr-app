@@ -69,7 +69,7 @@ export default {
         ...mapGetters("Department", ["department"]),
     },
     methods: {
-        ...mapActions("Department", ["editDepartment"]),
+        ...mapActions("Department", ["editDepartment", "fetchDepartment"]),
         async editDept() {
             try {
                 this.loading = true;
@@ -86,6 +86,11 @@ export default {
                 this.loading = false;
             }
         },
+    },
+    async created() {
+        const department = await this.fetchDepartment(this.$route.params.id);
+        this.name = department.name;
+        this.description = department.description;
     },
 };
 </script>

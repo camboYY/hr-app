@@ -11,8 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leaves', function (Blueprint $table) {
+        Schema::create('educations', function (Blueprint $table) {
             $table->id();
+            $table->string('schoolName');
+            $table->string('address');
+            $table->enum('graduated',['YES', 'NO']);
+            $table->enum('degreeEarned',['YES','NO']);
+            $table->enum('typeOfDegree',['Certificate','Master', 'Bachelor', 'PHD', 'Post Doctoral', 'Diploma']);
             $table->timestamps();
         });
     }
@@ -22,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leaves');
+        Schema::dropIfExists('educations');
     }
 };

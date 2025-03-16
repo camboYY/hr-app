@@ -45,6 +45,7 @@ export default {
             { title: "Department", path: "/department/list" },
             { title: "Designation", path: "/designation/list" },
             { title: "Employee", path: "/employee/list" },
+            { title: "Leave", path: "/leave/list" },
             { title: "Contract", path: "/contract" },
             { title: "About", path: "/about" },
             { title: "Logout", path: "/login" },

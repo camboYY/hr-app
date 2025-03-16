@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -12,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-         // Insert some stuff
-        DB::table('users')->insert(
-            array(
-                'name' => 'Admin',
-                'password' => password_hash('admin', PASSWORD_DEFAULT),
-                'email' => 'admin@domain.me',
-                'email_verified_at' => now()
-        ));
+        Schema::create('leave_statuses', function (Blueprint $table) {
+            $table->timestamps();
+            $table->id();
+            $table->string("reason")->nullable();
+            $table->date("date");
+            $table->enum("status",["APPROVED", "REJECTED","PENDING"]);
+        });
     }
 
     /**
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('leave_statuses');
     }
 };

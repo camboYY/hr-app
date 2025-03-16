@@ -3,6 +3,7 @@
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\LeaveRequestController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
@@ -40,6 +41,9 @@ Route::group(['middleware'=>'api','prefix'=> 'common'], function () {
         Route::get("/employee/{id}",[EmployeeController::class,"view"]);
         Route::post("/employee/updatePhoto/{id}", [EmployeeController::class,"updateImage"]);
 
+        Route::get("/leaves/request", [LeaveRequestController::class, "index"]);
+        Route::post("/leaves/request", [LeaveRequestController::class, "request"]);
+        
     });
 });
 

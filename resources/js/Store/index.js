@@ -3,6 +3,7 @@ import Auth from "./auth";
 import Department from "./department";
 import Designation from "./designation";
 import Employee from "./employee";
+import Leave from "./leave";
 
 const store = createStore({
     modules: {
@@ -10,6 +11,7 @@ const store = createStore({
         Department,
         Designation,
         Employee,
+        Leave,
     },
 });
 

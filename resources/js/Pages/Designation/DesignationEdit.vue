@@ -7,9 +7,9 @@
                         <span class="title">Edit Designation</span>
                     </v-card-title>
                     <v-card-text>
-                        <v-form @submit.prevent="handleSubmit">
-                            <v-row>
-                                <v-col cols="12" md="6">
+                        <div class="container">
+                            <v-form @submit.prevent="handleSubmit">
+                                <v-col>
                                     <v-text-field
                                         v-model="form.name"
                                         label="Name"
@@ -24,15 +24,14 @@
                                         </div>
                                     </template>
                                 </v-col>
-                                <v-col cols="12" md="6">
+                                <v-col>
                                     <v-textarea
                                         v-model="form.description"
                                         label="Description"
                                     ></v-textarea>
                                 </v-col>
-                            </v-row>
-                            <v-row>
-                                <v-col cols="12">
+
+                                <v-col>
                                     <v-btn
                                         type="submit"
                                         color="primary"
@@ -42,21 +41,12 @@
                                         Update
                                     </v-btn>
                                 </v-col>
-                            </v-row>
-                        </v-form>
+                            </v-form>
+                        </div>
                     </v-card-text>
                 </v-card>
             </v-col>
         </v-row>
-        <v-snackbar
-            :timeout="2000"
-            color="primary"
-            variant="tonal"
-            position="top"
-            v-model="form.snackbar"
-        >
-            Designation has <strong>successfully</strong> edited.
-        </v-snackbar>
     </div>
 </template>
 
@@ -76,7 +66,6 @@ export default {
             name: "",
             description: "",
             loading: false,
-            snackbar: false,
         });
 
         const rules = computed(() => {
@@ -110,7 +99,6 @@ export default {
                 form.name = "";
                 form.description = "";
                 // Show a success message
-                form.snackbar = true;
                 router.push({ name: "designation.list" });
             } catch (error) {
                 console.error("An error occurred", error);
@@ -123,9 +111,23 @@ export default {
             form,
             v$,
             handleSubmit,
+            store,
         };
+    },
+    async created() {
+        const designation = await this.store.dispatch(
+            "Designation/fetchDesignation",
+            this.$route.params.id
+        );
+        this.form.name = designation.name;
+        this.form.description = designation.responsibilities;
     },
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+</style>

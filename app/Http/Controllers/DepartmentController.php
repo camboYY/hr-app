@@ -37,7 +37,7 @@ class DepartmentController extends Controller
      */
     public function edit($id)
     {
-        return response()->json(Department::find($id));
+        return response()->json(Department::findOrFail($id));
     }
 
     /**

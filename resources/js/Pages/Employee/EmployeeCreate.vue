@@ -108,6 +108,20 @@
                             >
                             </v-select>
                         </v-col>
+                        <v-col cols="12" md="4"
+                            ><v-text-field
+                                v-model="form.email"
+                                label="Email"
+                                :rules="[required]"
+                            ></v-text-field>
+                        </v-col>
+                        <v-col cols="12" md="4"
+                            ><v-text-field
+                                v-model="form.password"
+                                label="Password"
+                                :rules="[required]"
+                            ></v-text-field>
+                        </v-col>
                     </v-row>
                     <v-row>
                         <v-col class="center" cols="12">
@@ -155,6 +169,8 @@ export default {
     },
     data: () => ({
         form: {
+            email: "",
+            password: "",
             firstName: "",
             lastName: "",
             middleName: "",

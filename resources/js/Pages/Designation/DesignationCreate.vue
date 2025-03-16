@@ -1,53 +1,49 @@
 <template>
     <div>
-        <v-row>
-            <v-col cols="12">
-                <v-card>
-                    <v-card-title>
-                        <span class="title">Create Designation</span>
-                    </v-card-title>
-                    <v-card-text>
-                        <v-form @submit.prevent="handleSubmit">
-                            <v-row>
-                                <v-col cols="12" md="6">
-                                    <v-text-field
-                                        v-model="form.name"
-                                        label="Name"
-                                        required
-                                    ></v-text-field>
-                                    <template v-if="v$.name.$errors.length > 0">
-                                        <div
-                                            class="text-error"
-                                            :error="v$.name.$errors"
-                                        >
-                                            Name is required
-                                        </div>
-                                    </template>
-                                </v-col>
-                                <v-col cols="12" md="6">
-                                    <v-textarea
-                                        v-model="form.description"
-                                        label="Description"
-                                    ></v-textarea>
-                                </v-col>
-                            </v-row>
-                            <v-row>
-                                <v-col cols="12">
-                                    <v-btn
-                                        type="submit"
-                                        color="primary"
-                                        :loading="form.loading"
-                                        :disabled="form.loading"
-                                    >
-                                        Create
-                                    </v-btn>
-                                </v-col>
-                            </v-row>
-                        </v-form>
-                    </v-card-text>
-                </v-card>
-            </v-col>
-        </v-row>
+        <v-card>
+            <v-card-title>
+                <span class="title">Create Designation</span>
+            </v-card-title>
+            <v-card-text>
+                <div class="container">
+                    <v-form @submit.prevent="handleSubmit">
+                        <v-col>
+                            <v-text-field
+                                v-model="form.name"
+                                label="Name"
+                                required
+                            ></v-text-field>
+                            <template v-if="v$.name.$errors.length > 0">
+                                <div
+                                    class="text-error"
+                                    :error="v$.name.$errors"
+                                >
+                                    Name is required
+                                </div>
+                            </template>
+                        </v-col>
+                        <v-col>
+                            <v-textarea
+                                v-model="form.description"
+                                label="Description"
+                            ></v-textarea>
+                        </v-col>
+
+                        <v-col>
+                            <v-btn
+                                type="submit"
+                                color="primary"
+                                :loading="form.loading"
+                                :disabled="form.loading"
+                            >
+                                Create
+                            </v-btn>
+                        </v-col>
+                    </v-form>
+                </div>
+            </v-card-text>
+        </v-card>
+
         <v-snackbar
             :timeout="2000"
             color="primary"
@@ -127,4 +123,9 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.container {
+    max-width: 800px;
+    margin: auto;
+}
+</style>

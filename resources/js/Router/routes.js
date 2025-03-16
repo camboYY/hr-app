@@ -64,6 +64,21 @@ const routes = [
         name: "employee.edit",
     },
     {
+        path: "/leave/request",
+        component: async () => import("../Pages/Leave/LeaveRequest.vue"),
+        name: "leave.request",
+    },
+    {
+        path: "/leave/list",
+        component: async () => import("../Pages/Leave/LeaveReport.vue"),
+        name: "leave.list",
+    },
+    {
+        path: "/leave/check",
+        component: async () => import("../Pages/Leave/LeaveCheck.vue"),
+        name: "leave.check",
+    },
+    {
         path: "/:pathMatch(.*)*",
         component: () => import("../Pages/NotFound.vue"),
     },

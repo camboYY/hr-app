@@ -25,7 +25,7 @@ const employee = {
         setEmployee({ commit }, employee) {
             commit("SET_EMPLOYEE", employee);
         },
-        async fetchEmployee({ dispatch }, id) {
+        async fetchEmployee(_, id) {
             const { data } = await axios.get(
                 `${baseUrl}common/employee/${id}`,
                 {
@@ -68,7 +68,7 @@ const employee = {
             dispatch("fetchEmployees");
         },
 
-        async deleteDesignation({ dispatch }, id) {
+        async deleteEmployee({ dispatch }, id) {
             await axios.delete(`${baseUrl}common/employee/${id}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem(

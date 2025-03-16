@@ -1,11 +1,11 @@
 import axios from "axios";
 import { baseUrl } from "../apiEnv";
 
-const designation = {
+const leave = {
     namespaced: true,
     state: () => ({
-        designation: {},
-        designations: {
+        leave: {},
+        leaves: {
             data: [],
             current_page: 1,
             last_page: 1,
@@ -14,16 +14,16 @@ const designation = {
         },
     }),
     mutations: {
-        SET_DESIGNATIONS(state, designations) {
-            state.designations = designations;
+        SET_LEAVES(state, leaves) {
+            state.leaves = leaves;
         },
-        SET_DESIGNATION(state, designation) {
-            state.designation = designation;
+        SET_LEAVE(state, leave) {
+            state.leave = leave;
         },
     },
     actions: {
         setDesignation({ commit }, designation) {
-            commit("SET_DESIGNATION", designation);
+            commit("SET_LEAVE", designation);
         },
         async createDesignation({ dispatch }, designation) {
             await axios.post(`${baseUrl}common/designation`, designation, {
@@ -62,19 +62,22 @@ const designation = {
                     },
                 }
             );
-            dispatch("fetchDesignations");
+            dispatch("fetchLeaves");
         },
-        async fetchDesignations({ commit }) {
-            const { data } = await axios.get(`${baseUrl}common/designation`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+        async fetchLeaves({ commit }) {
+            const { data } = await axios.get(
+                `${baseUrl}common/leaves/request`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "access_token"
+                        )}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
 
-            commit("SET_DESIGNATIONS", data.designations);
+            commit("SET_LEAVES", data.leaveRequests);
         },
 
         async fetchDesignation(_, id) {
@@ -93,9 +96,9 @@ const designation = {
         },
     },
     getters: {
-        getDesignation: (state) => state.designation,
-        getDesignations: (state) => state.designations,
+        leave: (state) => state.leave,
+        leaves: (state) => state.leaves,
     },
 };
 
-export default designation;
+export default leave;

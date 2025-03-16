@@ -37,7 +37,7 @@ class DesignationController extends Controller
 
 
     public function edit($id)   { 
-        $designation = Designation::find($id);
+        $designation = Designation::findOrFail($id);
         return response()->json($designation);
     }
 

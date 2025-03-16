@@ -62,6 +62,20 @@ const DepartmentStore = {
             });
             commit("SET_DEPARTMENTS", data.departments);
         },
+        async fetchDepartment({ commit }, id) {
+            const { data } = await axios.get(
+                `${baseUrl}common/department/${id}/edit`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem(
+                            "access_token"
+                        )}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            return data;
+        },
         async createDepartment({ dispatch }, department) {
             await axios.post(`${baseUrl}common/department`, department, {
                 headers: {

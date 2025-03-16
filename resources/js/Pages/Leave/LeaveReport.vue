@@ -1,12 +1,12 @@
 <template>
-    <div>
+    <div class="mx-auto">
         <v-row>
             <v-col cols="12">
                 <v-card>
                     <v-card-title>
                         <v-row>
                             <v-col cols="6">
-                                <span class="title">Employee List</span>
+                                <span class="title">Leave Request List</span>
                             </v-col>
                             <v-col cols="6" class="text-right">
                                 <v-btn
@@ -14,11 +14,11 @@
                                     @click="
                                         () =>
                                             $router.push({
-                                                name: 'employee.create',
+                                                name: 'leave.request',
                                             })
                                     "
                                 >
-                                    Add Employee
+                                    Request leave
                                 </v-btn>
                             </v-col>
                         </v-row>
@@ -27,12 +27,12 @@
                         <v-data-table
                             :no-data-text="noDataAvailable"
                             :headers="headers"
-                            :items="getManipulatedEmployees"
+                            :items="leavesData"
                             item-key="id"
                             class="elevation-1"
-                            v-model:items-per-page="employees.per_page"
+                            v-model:items-per-page="leaves.per_page"
                             @update:page="getEmployees"
-                            :items-length="employees.total"
+                            :items-length="leaves.total"
                             :loading="loading"
                         >
                             <template v-slot:item.nationalId="{ value }">
@@ -72,79 +72,53 @@
                 </v-card>
             </v-col>
         </v-row>
-        <ShowImage :source="image" :dialog="showImg" :onConfirm="onConfirm" />
     </div>
 </template>
-
 <script>
-import ShowImage from "@/components/ShowImage.vue";
-import moment from "moment";
 import { mapActions, mapGetters } from "vuex";
-
 export default {
-    components: { ShowImage },
     data: () => ({
-        image: "",
-        showImg: false,
         loading: false,
         noDataAvailable: "",
         headers: [
             {
-                title: "First Name",
+                title: "Staff Name",
                 sortable: true,
-                key: "firstName",
+                key: "staffName",
             },
             {
-                title: "Last Name",
-                key: "lastName",
+                title: "Reason",
+                key: "reason",
                 sortable: true,
-                align: "start",
+                align: "reason",
             },
             {
-                title: "Middle Name",
-                key: "middleName",
-                sortable: true,
-                align: "start",
-            },
-            {
-                title: "Phone Number",
-                key: "phoneNumber",
+                title: "Start Date",
+                key: "fromDate",
                 sortable: true,
                 align: "start",
             },
             {
-                title: "Currrent Address",
-                key: "currentAddress",
+                title: "To Date",
+                key: "toDate",
                 sortable: true,
                 align: "start",
             },
             {
-                title: "National ID",
-                key: "nationalId",
+                title: "Leave status",
+                key: "leaveStatus",
                 sortable: true,
                 align: "start",
             },
             {
-                title: "Date of Birth",
-                key: "dateOfBirth",
+                title: "Leave Type",
+                key: "leaveType",
                 sortable: true,
                 align: "start",
             },
             {
-                title: "Marital Status",
-                key: "maritalStatus",
-                sortable: true,
-                align: "start",
-            },
-            {
-                title: "Gender",
-                key: "gender",
-                sortable: true,
-                align: "start",
-            },
-            {
-                title: "Medical Certificate",
-                key: "medicalCertificate",
+                title: "Leave Balance",
+                key: "leaveBalance",
                 sortable: true,
                 align: "start",
             },
@@ -156,15 +130,16 @@ export default {
         ],
     }),
     async mounted() {
-        await this.getEmployees();
+        await this.fetchLeaves();
     },
     computed: {
-        ...mapGetters("Employee", ["employees"]),
-        getManipulatedEmployees() {
-            if (this.employees?.data?.length === 0) {
+        ...mapGetters("Leave", ["leaves"]),
+        leavesData() {
+            if (this.leaves?.data?.length === 0) {
                 this.noDataAvailable = "No record found";
             }
-            return this.employees?.data?.map((item) => {
+            console.log("Leaves: " + this.leaves);
+            return this.leaves?.data?.map((item) => {
                 return {
                     ...item,
                     created_at: moment(item.created_at).format(
@@ -175,34 +150,7 @@ export default {
         },
     },
     methods: {
-        ...mapActions("Employee", ["fetchEmployees", "deleteEmployee"]),
-        showImage(imag) {
-            this.image = imag;
-            this.showImg = true;
-        },
-        async handleDelete(id) {
-            await this.deleteEmployee(id);
-        },
-        onConfirm() {
-            this.showImg = false;
-        },
-        async getEmployees() {
-            this.loading = true;
-
-            try {
-                await this.fetchEmployees();
-            } catch (error) {
-                console.log(error);
-            } finally {
-                this.loading = false;
-            }
-        },
-        handleEdit(item) {
-            this.$router.push({
-                name: "employee.edit",
-                params: { id: item.id },
-            });
-        },
+        ...mapActions("Leave", ["fetchLeaves"]),
     },
 };
 </script>

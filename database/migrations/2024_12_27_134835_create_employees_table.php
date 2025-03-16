@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string("medicalCertificate")->nullable();
             $table->unsignedBigInteger("line_manager_id")->default(0);
             $table->unsignedBigInteger("designation_id")->nullable();
+            $table->integer("user_id")->nullable();
             $table->timestamps();
         });
     }
