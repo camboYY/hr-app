@@ -4,6 +4,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\LeaveRequestController;
+use App\Http\Controllers\LeaveTypeSettingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
@@ -41,9 +42,16 @@ Route::group(['middleware'=>'api','prefix'=> 'common'], function () {
         Route::get("/employee/{id}",[EmployeeController::class,"view"]);
         Route::post("/employee/updatePhoto/{id}", [EmployeeController::class,"updateImage"]);
 
+        Route::get("/leave-types", [LeaveTypeSettingController::class, "index"]);
+        Route::post("/leave-types", [LeaveTypeSettingController::class, "store"]);
+        Route::put("/leave-types/{id}", [LeaveTypeSettingController::class, "update"]);
+        Route::delete("/leave-types/{id}", [LeaveTypeSettingController::class, "destroy"]);
+
         Route::get("/leaves/request", [LeaveRequestController::class, "index"]);
         Route::post("/leaves/request", [LeaveRequestController::class, "request"]);
-        
+        Route::get("/leaves/findEmployee", [LeaveRequestController::class, "searchEmployee"]);
+        Route::put("/leaves/{id}/update", [LeaveRequestController::class, "update"]);
+        Route::put("/leaves/{id}/approve-request", [LeaveRequestController::class, "approveRequest"]);
     });
 });
 

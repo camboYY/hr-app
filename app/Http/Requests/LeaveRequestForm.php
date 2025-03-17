@@ -23,10 +23,11 @@ class LeaveRequestForm extends FormRequest
     {
         return [
         'leave_type_setting_id'=> 'required|integer',
-        'leave_status_id'=> 'required|integer',
+        'relief_id'=> 'required|integer',
         'reason'=>"nullable",
         'fromDate' =>"required|date|after_or_equal:today",
         'toDate' =>"required|date|after_or_equal:fromDate",
+        'leave_option'=>"required",
         ];
     }
 

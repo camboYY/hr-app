@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('leave_type_settings', function (Blueprint $table) {
             $table->id();
-            $table->enum('leave_type',["ANNUAL_LEAVE","SICK_LEAVE","SPECIAL_LEAVE","MARRIAGE_LEAVE","MANDATORY_LEAVE","MATERNITY_LEAVE"]);
+            $table->enum('leave_type',["ANNUAL_LEAVE","SICK_LEAVE","SPECIAL_LEAVE","MARRIAGE_LEAVE","MANDATORY_LEAVE","MATERNITY_LEAVE","COMPENSATE_LEAVE"]);
             $table->double('leave_balance')->default(0);
             $table->timestamps();
         });

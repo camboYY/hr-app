@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string("reason")->nullable();
             $table->date("fromDate")->nullable();
             $table->date("toDate")->nullable();
-            $table->enum("leave_option",["AFTERNOON","MORNING","NIGHT"]);
+            $table->enum("leave_option",["AFTERNOON","MORNING","NIGHT", "FULL"]);
             $table->timestamps();
         });
     }
