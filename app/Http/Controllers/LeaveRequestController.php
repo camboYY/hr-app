@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Dto\LeaveDto;
 use App\Http\Requests\LeaveApproveRequestForm;
 use App\Http\Requests\LeaveRequestForm;
 use App\Http\Requests\LeaveUpdateRequestForm;
+use App\Mail\LeaveConfirmation;
+use App\Mail\SendMailForLeave;
 use App\Models\Employee;
 use App\Models\EmployeeLeave;
 use App\Models\LeaveStatus;
 use Date;
 use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Validator;
 
 class LeaveRequestController extends Controller
@@ -71,6 +75,14 @@ class LeaveRequestController extends Controller
             $leaveRequest->relief_id = $leaveRequestForm->relief_id;
             $leaveRequest->reason = $leaveRequestForm->reason;
             $leaveRequest->save();
+            $leaveDto = new LeaveDto();
+            $leaveDto->fromDate = $leaveRequestForm->fromDate;
+            $leaveDto->toDate = $leaveRequestForm->toDate;
+            $leaveDto->leave_type = $leaveRequest->leaveTypeSetting->leave_type;
+            $leaveDto->leaveOption = $leaveRequestForm->leave_option;
+            $leaveDto->subjectName = "Dear Staff,";
+            Mail::to($leaveRequestForm->user())->send(new SendMailForLeave($leaveDto));
+
             return response()->json($leaveRequest,200);
 
         } catch(\Exception $e) {
@@ -138,10 +150,19 @@ class LeaveRequestController extends Controller
         $leaveStatus = LeaveStatus::findOrFail($leaveRequest->leave_status_id);
         $leaveStatus->status = $request->leave_status;
         $leaveStatus->date = Date::now()->toIso8601String();
+
         if($request->has("comment")) {
             $leaveStatus->reason = $request->comment;
         }
         $leaveStatus->save();
+
+        $leaveDto = new LeaveDto();
+        $leaveDto->leaveStatus = $request->leave_status;
+        $leaveDto->subjectName = "Dear Everone,";
+        
+        Mail::to($request->user())->send(new LeaveConfirmation($leaveDto));
+
+
         return response()->json(null, 200);
     }
 }
