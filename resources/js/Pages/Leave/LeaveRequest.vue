@@ -13,7 +13,6 @@
                         @submit.prevent="submitForm"
                     >
                         <v-autocomplete
-                            v-model:search="search"
                             :items="filterItems"
                             label="Search relief"
                             chips
@@ -22,6 +21,7 @@
                             item-title="text"
                             item-value="value"
                             v-model="form.relief_id"
+                            @update:search="searchEmployee"
                         ></v-autocomplete>
                         <v-select
                             label="Leave Options"
@@ -31,16 +31,11 @@
                             v-model="form.leaveOption"
                             :rules="[required]"
                         >
-                            ></v-select
-                        >
-                        <v-date-input
-                            v-show="isCompensated"
-                            v-model="form.compensateDate"
-                            label="Compensate Date"
-                        ></v-date-input>
+                        </v-select>
+
                         <v-select
                             label="Leave Type"
-                            :items="leaveType"
+                            :items="filterLeaveTypes"
                             item-title="label"
                             item-value="value"
                             v-model="form.leaveType"
@@ -68,6 +63,7 @@
                             type="submit"
                             variant="elevated"
                             :disabled="!form.valid"
+                            :loading="loading"
                             class="mt-10 items-center"
                             >Submit</v-btn
                         >
@@ -82,6 +78,8 @@
 import { useRoute } from "vue-router";
 import { VDateInput } from "vuetify/labs/VDateInput";
 import { mapActions, mapGetters } from "vuex";
+import { formatDate } from "../../utils";
+
 export default {
     components: {
         VDateInput,
@@ -94,24 +92,12 @@ export default {
         return {
             search: "",
             items: [],
-            isCompensated: false,
             loading: false,
             leaveOption: [
                 { label: "Afternoon", value: "AFTERNOON" },
                 { label: "Night", value: "NIGNT" },
                 { label: "Morning", value: "MORNING" },
-            ],
-            leaveType: [
-                { label: "Anual leave", value: "ANNUAL_LEAVE" },
-                { label: "Special leave", value: "SPECIAL_LEAVE" },
-                { label: "Sick leave", value: "SICK_LEAVE" },
-                { label: "Maternity leave", value: "MATERNITY_LEAVE" },
-                { label: "Mandatory leave", value: "MANDATORY_LEAVE" },
-                { label: "Marriage leave", value: "MARRIAGE_LEAVE" },
-                {
-                    label: "Compensate leave",
-                    value: "COMPENSATE_LEAVE",
-                },
+                { label: "Full Day", value: "FULL" },
             ],
             form: {
                 leaveStartDate: new Date(),
@@ -120,56 +106,68 @@ export default {
                 leaveOption: "",
                 leaveType: "",
                 valid: false,
-                compensateDate: new Date(),
                 relief_id: "",
             },
         };
     },
     watch: {
-        "form.leaveType"(item) {
-            if (item === "COMPENSATE_LEAVE") {
-                this.isCompensated = true;
-                return;
-            }
-        },
         async search(newSearch) {
-            if (newSearch.length >= 2) {
+            if (newSearch.length > 2) {
                 await this.fetchData(newSearch);
             }
         },
     },
+    async created() {
+        await this.fetchLeaveTypes();
+    },
     computed: {
-        ...mapGetters("Leave", ["searchEmployees"]),
+        ...mapGetters("Leave", ["searchEmployees", "leaveTypes"]),
         filterItems() {
             return this.searchEmployees.map((item) => ({
                 text: item.firstName + " " + item.lastName,
                 value: item.id,
             }));
         },
+        filterLeaveTypes() {
+            return this.leaveTypes.map((item) => ({
+                label: item.leave_type,
+                value: item.id,
+            }));
+        },
     },
     methods: {
-        ...mapActions("Leave", ["searchEmployee"]),
+        ...mapActions("Leave", [
+            "searchEmployee",
+            "submitLeaveRequest",
+            "fetchLeaveTypes",
+        ]),
         async fetchData() {
-            if (this.search.length > 2) {
-                try {
-                    this.loading = true;
-                    this.items = await this.searchEmployee(this.search);
-                } catch (e) {
-                } finally {
-                    this.loading = false;
-                }
+            try {
+                this.loading = true;
+                this.items = await this.searchEmployee(this.search);
+            } catch (e) {
+            } finally {
+                this.loading = false;
             }
         },
+
         async submitForm() {
+            this.loading = true;
             try {
                 // Perform form submission logic here
-                console.log(
-                    "Form submitted successfully",
-                    this.form,
-                    this.search
-                );
+                await this.submitLeaveRequest({
+                    leave_type_setting_id: this.form.leaveType,
+                    relief_id: this.form.relief_id,
+                    fromDate: formatDate(this.form.fromDate),
+                    toDate: formatDate(this.form.toDate),
+                    reason: this.form.leaveReason,
+                    leave_option: this.form.leaveOption,
+                });
+                this.$router.push({ name: "leave.list" });
             } catch (error) {
                 console.error("Error submitting form:", error);
+            } finally {
+                this.loading = false;
             }
         },
         required(v) {

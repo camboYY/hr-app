@@ -33,12 +33,14 @@ class EmployeeController extends Controller
 
     public function index(Request $request)
     {
+        $perPage = $request->get("per_page");
+
         $query = Employee::query();
         if ($request->has("query")) {
             $query = $query->where("firstName","like","%". $request->get("query") ."%");
             $query = $query->orWhere("lastName","like","%". $request->get("query") ."%");
         }
-        $employees = $query->paginate(10);
+        $employees = $query->paginate(perPage: $perPage);
         return response()->json($employees);
     }
 

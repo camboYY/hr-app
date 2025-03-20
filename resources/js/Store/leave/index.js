@@ -5,6 +5,7 @@ const leave = {
     namespaced: true,
     state: () => ({
         leave: {},
+        leaveTypes: [],
         employees: [],
         leaves: {
             data: [],
@@ -24,13 +25,16 @@ const leave = {
         SET_SEARCH_EMPLOYEES(state, employees) {
             state.employees = employees;
         },
+        SET_LEAVE_TYPES(state, leaveTypes) {
+            state.leaveTypes = leaveTypes;
+        },
     },
     actions: {
-        setDesignation({ commit }, designation) {
-            commit("SET_LEAVE", designation);
+        setLeave({ commit }, leave) {
+            commit("SET_LEAVE", leave);
         },
-        async createDesignation({ dispatch }, designation) {
-            await axios.post(`${baseUrl}common/designation`, designation, {
+        async submitLeaveRequest({ dispatch }, leave) {
+            await axios.post(`${baseUrl}common/leaves/request`, leave, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem(
                         "access_token"
@@ -38,7 +42,6 @@ const leave = {
                     "Content-Type": "application/json",
                 },
             });
-            dispatch("fetchDesignations");
         },
 
         async deleteDesignation({ dispatch }, id) {
@@ -52,23 +55,21 @@ const leave = {
             });
             dispatch("fetchDesignations");
         },
-        async editDesignation({ dispatch }, designation) {
-            const { id, name, responsibilities } = designation;
-            await axios.put(
-                `${baseUrl}common/designation/${id}`,
-                { name, responsibilities },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+        async getLeave({ commit }, { id }) {
+            await axios.get(`${baseUrl}common/leaves/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                        "access_token"
+                    )}`,
+                    "Content-Type": "application/json",
+                },
+            });
             dispatch("fetchLeaves");
         },
-        async fetchLeaves({ commit }) {
+        async fetchLeaves(
+            { commit },
+            { page, perPage, search, fromDate, toDate }
+        ) {
             const { data } = await axios.get(
                 `${baseUrl}common/leaves/request`,
                 {
@@ -78,12 +79,19 @@ const leave = {
                         )}`,
                         "Content-Type": "application/json",
                     },
+                    params: {
+                        page,
+                        perPage,
+                        search,
+                        fromDate,
+                        toDate,
+                    },
                 }
             );
 
-            commit("SET_LEAVES", data.leaveRequests);
+            commit("SET_LEAVES", data);
         },
-        async searchEmployee({ commit }) {
+        async searchEmployee({ commit }, search) {
             const { data } = await axios.get(
                 `${baseUrl}common/leaves/findEmployee`,
                 {
@@ -93,29 +101,31 @@ const leave = {
                         )}`,
                         "Content-Type": "application/json",
                     },
+                    params: {
+                        query: search,
+                    },
                 }
             );
             commit("SET_SEARCH_EMPLOYEES", data);
         },
-        async fetchDesignation(_, id) {
-            const { data } = await axios.get(
-                `${baseUrl}common/designation/${id}/edit`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-            return data;
+
+        async fetchLeaveTypes({ commit }) {
+            const { data } = await axios.get(`${baseUrl}common/leave-types`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem(
+                        "access_token"
+                    )}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            commit("SET_LEAVE_TYPES", data.data);
         },
     },
     getters: {
         leave: (state) => state.leave,
         leaves: (state) => state.leaves,
         searchEmployees: (state) => state.employees,
+        leaveTypes: (state) => state.leaveTypes,
     },
 };
 

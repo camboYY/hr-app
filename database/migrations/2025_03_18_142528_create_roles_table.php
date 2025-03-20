@@ -11,12 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leave_statuses', function (Blueprint $table) {
-            $table->timestamps();
+        Schema::create('roles', function (Blueprint $table) {
             $table->id();
-            $table->string("reason")->nullable();
-            $table->date("date");
-            $table->enum("status",["APPROVED", "REJECTED","PENDING","CANCELLED"]);
+            $table->string('name');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leave_statuses');
+        Schema::dropIfExists('roles');
     }
 };

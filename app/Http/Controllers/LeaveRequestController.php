@@ -21,6 +21,12 @@ class LeaveRequestController extends Controller
 {
      public function index(Request $request)
     {
+        $perPage = $request->get('perPage', 10);  // Default to 10 items per page
+        $search = $request->get('search', "");
+
+        $fromDate = $request->get("fromDate");
+        $toDate = $request->get("toDate");
+
         $validator = Validator::make($request->all(), [
             'fromDate' => 'nullable|date|date_format:Y-m-d',
             'toDate' => 'nullable|date|date_format:Y-m-d',
@@ -29,23 +35,25 @@ class LeaveRequestController extends Controller
             return response()->json($validator->errors(), 422);
         }
         
-        $fromDate = $request->fromDate;
-        $toDate = $request->toDate;
         $query = EmployeeLeave::query();
 
         if($request->has("fromDate")){
             $query->whereDate('fromDate','>=',$fromDate);
         }
 
-         if($request->has("toDate")){
-            $query->orWhereDate('toDate','<=',$toDate);
+        if($request->has("toDate")){
+            $query->whereDate('toDate','<=',$toDate);
         }
 
-        if( $request->has('query') ) {
-            $query->orWhere('reason','like','%'.$request->get('query').'%');
+        if( $request->has('search') ) {
+            $query->whereHas('employee', function($query) use ($search){
+                $query->where('firstName','like','%'.$search.'%');
+                $query->orWhere('lastName','like','%'.$search.'%');
+            });
         }
+
         
-        $leaveRequests = $query->with(["leaveStatus", "leaveTypeSetting", "relief"])->paginate(perPage: 10);
+        $leaveRequests = $query->with(["leaveStatus", "leaveTypeSetting", "relief", "employee"])->paginate($perPage);
 
         return response()->json($leaveRequests);
     }
@@ -164,5 +172,11 @@ class LeaveRequestController extends Controller
 
 
         return response()->json(null, 200);
+    }
+
+    public function edit($id)
+    {
+        $leaveRequest = EmployeeLeave::with(["leaveStatus", "leaveTypeSetting", "relief", "employee"])->findOrFail($id);
+        return response()->json($leaveRequest);
     }
 }

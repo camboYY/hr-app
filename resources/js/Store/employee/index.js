@@ -92,7 +92,7 @@ const employee = {
             });
             dispatch("fetchEmployees");
         },
-        async fetchEmployees({ commit }) {
+        async fetchEmployees({ commit }, { page, perPage }) {
             const { data } = await axios.get(`${baseUrl}common/employee`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem(
@@ -100,6 +100,7 @@ const employee = {
                     )}`,
                     "Content-Type": "application/json",
                 },
+                params: { page, perPage },
             });
             commit("SET_EMPLOYEES", data);
         },

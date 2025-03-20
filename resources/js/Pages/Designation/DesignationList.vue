@@ -27,6 +27,7 @@
                     :items-per-page="designation.per_page"
                     :items-length="designation.total"
                     @update:page="fetchDesignationAgain"
+                    v-model="designation.current_page"
                     item-key="id"
                     class="elevation-1"
                 >

@@ -31,4 +31,9 @@ class EmployeeLeave extends Model
     {
         return $this->belongsTo(Employee::class,'relief_id');
     }
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
+    }
 }

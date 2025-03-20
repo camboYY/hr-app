@@ -52,6 +52,7 @@ Route::group(['middleware'=>'api','prefix'=> 'common'], function () {
         Route::get("/leaves/findEmployee", [LeaveRequestController::class, "searchEmployee"]);
         Route::put("/leaves/{id}/update", [LeaveRequestController::class, "update"]);
         Route::put("/leaves/{id}/approve-request", [LeaveRequestController::class, "approveRequest"]);
+        Route::get("/leaves/{id}", [LeaveRequestController::class, "edit"]);
     });
 });
 

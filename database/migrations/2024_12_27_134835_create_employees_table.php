@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('lastName');
             $table->string('middleName')->nullable();;
             $table->string('nationalId')->nullable();;
-            $table->enum('maritalStatus', ['single','married','divorced'])->default('single');
+            $table->enum('maritalStatus', ['single','married','divorced','Widowed'])->default('single');
             $table->date("dateOfBirth")->nullable();
             $table->string("currentAddress")->nullable();
             $table->enum("gender",['male','female'])->default("male");

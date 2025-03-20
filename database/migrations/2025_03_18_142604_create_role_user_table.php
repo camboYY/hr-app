@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('leave_statuses', function (Blueprint $table) {
-            $table->timestamps();
+        Schema::create('role_user', function (Blueprint $table) {
             $table->id();
-            $table->string("reason")->nullable();
-            $table->date("date");
-            $table->enum("status",["APPROVED", "REJECTED","PENDING","CANCELLED"]);
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('role_id');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('leave_statuses');
+        Schema::dropIfExists('role_user');
     }
 };

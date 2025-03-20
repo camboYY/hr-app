@@ -29,6 +29,7 @@
                             :counter="10"
                             label="Password"
                             required
+                            type="password"
                         ></v-text-field>
                         <div :class="{ error: v$.password.$errors.length }">
                             <div

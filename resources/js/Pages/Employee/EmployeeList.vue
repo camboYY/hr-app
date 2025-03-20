@@ -24,16 +24,15 @@
                         </v-row>
                     </v-card-title>
                     <v-card-text>
-                        <v-data-table
+                        <v-data-table-server
                             :no-data-text="noDataAvailable"
                             :headers="headers"
                             :items="getManipulatedEmployees"
-                            item-key="id"
                             class="elevation-1"
-                            v-model:items-per-page="employees.per_page"
-                            @update:page="getEmployees"
-                            :items-length="employees.total"
                             :loading="loading"
+                            v-model:items-per-page="itemsPerPage"
+                            :items-length="employees.total"
+                            @update:options="fetchEmployees"
                         >
                             <template v-slot:item.nationalId="{ value }">
                                 <v-icon
@@ -67,7 +66,7 @@
                                     mdi-delete
                                 </v-icon>
                             </template>
-                        </v-data-table>
+                        </v-data-table-server>
                     </v-card-text>
                 </v-card>
             </v-col>
@@ -88,6 +87,8 @@ export default {
         showImg: false,
         loading: false,
         noDataAvailable: "",
+        page: 1,
+        itemsPerPage: 10,
         headers: [
             {
                 title: "First Name",
@@ -155,9 +156,7 @@ export default {
             },
         ],
     }),
-    async mounted() {
-        await this.getEmployees();
-    },
+
     computed: {
         ...mapGetters("Employee", ["employees"]),
         getManipulatedEmployees() {
