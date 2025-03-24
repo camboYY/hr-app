@@ -13,13 +13,11 @@
                         <v-date-input
                             v-model="fromDate"
                             label="Start date"
-                            @input="fetchLeaves"
                             debounce="300"
                         ></v-date-input>
                         <v-date-input
                             v-model="toDate"
                             label="End date"
-                            @input="fetchLeaves"
                             debounce="300"
                         ></v-date-input>
                     </div>
@@ -47,11 +45,11 @@
                         <v-data-table-server
                             :no-data-text="noDataAvailable"
                             :headers="headers"
-                            :items="leavesData"
+                            :items="leavesData.items"
                             class="elevation-1"
                             :loading="loading"
                             v-model:items-per-page="itemsPerPage"
-                            :items-length="leaves.total"
+                            :items-length="leaves?.total"
                             @update:options="fetchLeaves"
                         >
                             <template v-slot:item.nationalId="{ value }">
@@ -76,14 +74,12 @@
                             </template>
                             <template v-slot:item.actions="{ item }">
                                 <v-icon
+                                    v-show="item.leaveStatus === 'PENDING'"
                                     small
                                     class="mr-2"
                                     @click="handleEdit(item)"
                                 >
-                                    mdi-pencil
-                                </v-icon>
-                                <v-icon small @click="handleDelete(item.id)">
-                                    mdi-delete
+                                    mdi-cancel
                                 </v-icon>
                             </template>
                         </v-data-table-server>
@@ -104,7 +100,7 @@ export default {
     data: () => ({
         loading: false,
         noDataAvailable: "",
-        page: 1,
+        page: 0,
         search: "",
         itemsPerPage: 10,
         fromDate: null,
@@ -157,6 +153,12 @@ export default {
                 align: "start",
             },
             {
+                title: "Leave Option",
+                value: "leaveOption",
+                sortable: false,
+                align: "start",
+            },
+            {
                 title: "Actions",
                 value: "actions",
                 sortable: false,
@@ -199,45 +201,33 @@ export default {
             if (this.leaves?.data?.length === 0) {
                 this.noDataAvailable = "No record found";
             }
-            return this.leaves?.data?.map((item) => {
-                return {
-                    ...item,
-                    created_at: moment(item.created_at).format(
-                        "MMMM Do YYYY, h:mm:ss a"
-                    ),
-                    staffName: !item?.employee
-                        ? "-"
-                        : item?.employee?.firstName +
-                          " " +
-                          item?.employee?.lastName,
-                    leaveType: !item?.leave_type_setting
-                        ? "-"
-                        : item?.leave_type_setting?.leave_type,
-                    leaveBalance: !item?.leave_type_setting
-                        ? "-"
-                        : item?.leave_type_setting?.leave_balance,
-                    reliefName: !item?.relief
-                        ? "-"
-                        : item?.relief?.firstName +
-                          " " +
-                          item?.relief?.lastName,
-                    leaveStatus: !!item?.leave_status
-                        ? item?.leave_status?.status
-                        : "OTHER",
-                };
-            });
+            const items = this.leaves?.data?.map((leave, i) => ({
+                ...leave,
+                leaveStatus: leave?.status,
+                leaveType: leave?.leave_type,
+                leaveBalance: leave?.leave_balance,
+                leaveOption: leave?.leave_option,
+            }));
+
+            return { items };
         },
     },
     methods: {
-        ...mapActions("Leave", ["fetchLeaves", "setLeave"]),
+        ...mapActions("Leave", ["fetchLeaves", "cancelLeave"]),
         formatDate(newDate) {
             return moment(newDate).format("Y-MM-DD");
         },
-        handleEdit(item) {
-            this.setLeave(item);
-            this.$router.push({
-                name: "leave.edit",
-                params: { id: item.id },
+        async handleEdit(item) {
+            await this.cancelLeave({
+                id: item.id,
+                leave_status: "CANCELLED",
+            });
+            await this.fetchLeaves({
+                page: this.page,
+                perPage: this.itemsPerPage,
+                search: this.search,
+                fromDate: this.formatDate(this.fromDate ?? new Date()),
+                toDate: this.formatDate(this.toDate ?? new Date()),
             });
         },
     },

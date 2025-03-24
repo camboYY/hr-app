@@ -1,5 +1,4 @@
-import axios from "axios";
-import { baseUrl } from "../apiEnv";
+import axios from "../axios";
 
 const leave = {
     namespaced: true,
@@ -7,20 +6,11 @@ const leave = {
         leave: {},
         leaveTypes: [],
         employees: [],
-        leaves: {
-            data: [],
-            current_page: 1,
-            last_page: 1,
-            per_page: 10,
-            total: 0,
-        },
+        leaves: [],
     }),
     mutations: {
         SET_LEAVES(state, leaves) {
             state.leaves = leaves;
-        },
-        SET_LEAVE(state, leave) {
-            state.leave = leave;
         },
         SET_SEARCH_EMPLOYEES(state, employees) {
             state.employees = employees;
@@ -30,94 +20,48 @@ const leave = {
         },
     },
     actions: {
-        setLeave({ commit }, leave) {
-            commit("SET_LEAVE", leave);
-        },
         async submitLeaveRequest({ dispatch }, leave) {
-            await axios.post(`${baseUrl}common/leaves/request`, leave, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            await axios.post(`common/leaves/request`, leave);
         },
-
-        async deleteDesignation({ dispatch }, id) {
-            await axios.delete(`${baseUrl}common/designation/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
+        async cancelLeave({ dispatch }, { id, leave_status }) {
+            await axios.put(`common/leaves/${id}/cancel`, {
+                leave_status: leave_status,
             });
-            dispatch("fetchDesignations");
         },
         async getLeave({ commit }, { id }) {
-            await axios.get(`${baseUrl}common/leaves/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            await axios.get(`common/leaves/${id}`);
             dispatch("fetchLeaves");
         },
         async fetchLeaves(
             { commit },
             { page, perPage, search, fromDate, toDate }
         ) {
-            const { data } = await axios.get(
-                `${baseUrl}common/leaves/request`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                    params: {
-                        page,
-                        perPage,
-                        search,
-                        fromDate,
-                        toDate,
-                    },
-                }
-            );
+            const { data } = await axios.get(`common/leaves/request`, {
+                params: {
+                    page,
+                    perPage,
+                    search,
+                    fromDate,
+                    toDate,
+                },
+            });
 
-            commit("SET_LEAVES", data);
+            commit("SET_LEAVES", {
+                data: data.data,
+                total: data.total[0].totalRecords,
+            });
         },
         async searchEmployee({ commit }, search) {
-            const { data } = await axios.get(
-                `${baseUrl}common/leaves/findEmployee`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                    params: {
-                        query: search,
-                    },
-                }
-            );
+            const { data } = await axios.get(`common/leaves/findEmployee`, {
+                params: {
+                    query: search,
+                },
+            });
             commit("SET_SEARCH_EMPLOYEES", data);
         },
 
         async fetchLeaveTypes({ commit }) {
-            const { data } = await axios.get(`${baseUrl}common/leave-types`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            const { data } = await axios.get(`common/leave-types`);
             commit("SET_LEAVE_TYPES", data.data);
         },
     },

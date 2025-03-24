@@ -1,5 +1,4 @@
-import axios from "axios";
-import { baseUrl } from "../apiEnv";
+import axios from "../axios";
 
 const leaveSetting = {
     namespaced: true,
@@ -24,85 +23,39 @@ const leaveSetting = {
     actions: {
         async fetchLeaveSettings(state) {
             const { data } = await axios.get(
-                `${baseUrl}common/leaveSetting`,
-                leaveSettings,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                }
+                `common/leaveSetting`,
+                leaveSettings
             );
 
             state.commit("SET_LEAVE_SETTINGS", data);
         },
         async createLeaveSetting({ dispatch }, leaveSetting) {
-            await axios.post(`${baseUrl}common/leaveSetting`, leaveSetting, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            await axios.post(`common/leaveSetting`, leaveSetting);
             dispatch("fetchLeaveSettings");
         },
 
         async deleteDesignation({ dispatch }, id) {
-            await axios.delete(`${baseUrl}common/designation/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            await axios.delete(`common/designation/${id}`);
             dispatch("fetchDesignations");
         },
+
         async editDesignation({ dispatch }, designation) {
             const { id, name, responsibilities } = designation;
-            await axios.put(
-                `${baseUrl}common/designation/${id}`,
-                { name, responsibilities },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+            await axios.put(`common/designation/${id}`, {
+                name,
+                responsibilities,
+            });
             dispatch("fetchLeaves");
         },
 
         async searchEmployee({ commit }) {
-            const { data } = await axios.get(
-                `${baseUrl}common/leaves/findEmployee`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+            const { data } = await axios.get(`common/leaves/findEmployee`);
             commit("SET_SEARCH_EMPLOYEES", data);
         },
+
         async fetchDesignation(_, id) {
             const { data } = await axios.get(
-                `${baseUrl}common/designation/${id}/edit`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                }
+                `${baseUrl}common/designation/${id}/edit`
             );
             return data;
         },

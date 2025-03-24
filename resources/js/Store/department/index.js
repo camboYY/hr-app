@@ -1,4 +1,4 @@
-import { baseUrl } from "../apiEnv";
+import axios from "../axios";
 
 const DepartmentStore = {
     namespaced: true,
@@ -25,66 +25,24 @@ const DepartmentStore = {
             commit("SET_DEPARTMENT", department);
         },
         async deleteDepartment({ dispatch }, id) {
-            await axios.delete(`${baseUrl}common/department/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            await axios.delete(`common/department/${id}`);
             dispatch("fetchDepartments");
         },
         async editDepartment({ dispatch }, department) {
             const { id, name, description } = department;
-            await axios.put(
-                `${baseUrl}common/department/${id}`,
-                { name, description },
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+            await axios.put(`common/department/${id}`, { name, description });
             dispatch("fetchDepartments");
         },
         async fetchDepartments({ commit }) {
-            const { data } = await axios.get(`${baseUrl}common/department`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            const { data } = await axios.get(`common/department`);
             commit("SET_DEPARTMENTS", data.departments);
         },
         async fetchDepartment({ commit }, id) {
-            const { data } = await axios.get(
-                `${baseUrl}common/department/${id}/edit`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem(
-                            "access_token"
-                        )}`,
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
+            const { data } = await axios.get(`common/department/${id}/edit`);
             return data;
         },
         async createDepartment({ dispatch }, department) {
-            await axios.post(`${baseUrl}common/department`, department, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            await axios.post(`common/department`, department);
             dispatch("fetchDepartments");
         },
     },

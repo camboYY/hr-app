@@ -23,39 +23,58 @@ class LeaveRequestController extends Controller
     {
         $perPage = $request->get('perPage', 10);  // Default to 10 items per page
         $search = $request->get('search', "");
-
+        $offset = $request->get('page',0);
         $fromDate = $request->get("fromDate");
         $toDate = $request->get("toDate");
+        $userId = auth()->id();
 
         $validator = Validator::make($request->all(), [
             'fromDate' => 'nullable|date|date_format:Y-m-d',
             'toDate' => 'nullable|date|date_format:Y-m-d',
         ]);
+
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
-        
-        $query = EmployeeLeave::query();
+        $query = "
+            SELECT empleave.id,
+                CONCAT(emp.firstName, ' ', emp.lastName) AS staffName,  
+                empleave.fromDate,
+                empleave.toDate, 
+                empleave.leave_option, 
+                empleave.reason, 
+                lts.leave_type,
+                lts.leave_balance, 
+                CONCAT(e.firstName, ' ', e.lastName) AS reliefName,
+                ls.status 
+            FROM employees AS emp
+            INNER JOIN employee_leaves AS empleave ON emp.id = empleave.employee_id
+            INNER JOIN leave_type_settings AS lts ON lts.id = empleave.leave_type_setting_id
+            INNER JOIN employees AS e ON empleave.relief_id = e.id 
+            INNER JOIN leave_statuses AS ls ON ls.id = empleave.leave_status_id
+            WHERE emp.user_id = ? ";
+        $bindings[] = $userId;
 
-        if($request->has("fromDate")){
-            $query->whereDate('fromDate','>=',$fromDate);
+        if($fromDate){
+            $query.= " AND empleave.fromDate >=? ";
+            $bindings[] = $fromDate;
+        }
+        if($toDate){
+            $query.= " AND empleave.toDate <=? ";
+            $bindings[] = $toDate;
         }
 
-        if($request->has("toDate")){
-            $query->whereDate('toDate','<=',$toDate);
+        if($search){
+            $query.= " AND (emp.firstName LIKE? OR emp.lastName LIKE?) ";
+            $bindings[] = "%$search%";
+            $bindings[] = "%$search%";
         }
-
-        if( $request->has('search') ) {
-            $query->whereHas('employee', function($query) use ($search){
-                $query->where('firstName','like','%'.$search.'%');
-                $query->orWhere('lastName','like','%'.$search.'%');
-            });
-        }
-
-        
-        $leaveRequests = $query->with(["leaveStatus", "leaveTypeSetting", "relief", "employee"])->paginate($perPage);
-
-        return response()->json($leaveRequests);
+        $query.= "LIMIT ? OFFSET ?";
+        $bindings[] = $perPage;
+        $bindings[] = $offset;
+        $leaveRequests = DB::select($query, $bindings);
+        $totalRecords = DB::select("SELECT count(*) as totalRecords FROM employee_leaves;");
+        return response()->json(["data"=>$leaveRequests,"total"=> $totalRecords]); //
     }
 
     public function request(LeaveRequestForm $leaveRequestForm)
@@ -63,9 +82,9 @@ class LeaveRequestController extends Controller
         DB::beginTransaction();
         try{
             $leaveRequestForm->validated();
-            $employee_id = Auth()->id();
-            $employees = Employee::select("line_manager_id")->where("id", $employee_id)->get();
-            if(!isset($employees)) {
+            $user_id = Auth()->id();
+            $employee = Employee::select("line_manager_id","id")->where("user_id", $user_id)->first();
+            if(!isset($employee)) {
                 return response()->json(['error' => 'You are not authorized to make leave request'], 403);
             }
             $leaveStatus = new LeaveStatus();
@@ -74,12 +93,12 @@ class LeaveRequestController extends Controller
             $leaveStatus->save();
             $leaveRequest = new EmployeeLeave();
             $leaveRequest->leave_status_id = $leaveStatus->id;
-            $leaveRequest->employee_id = Auth()->id();
+            $leaveRequest->employee_id = $employee->id;
             $leaveRequest->fromDate = $leaveRequestForm->fromDate;
             $leaveRequest->toDate = $leaveRequestForm->toDate;
             $leaveRequest->leave_type_setting_id = $leaveRequestForm->leave_type_setting_id;
             $leaveRequest->leave_option = $leaveRequestForm->leave_option;
-            $leaveRequest->approver_id = $employees[0]->line_manager_id;
+            $leaveRequest->approver_id = $employee->line_manager_id;
             $leaveRequest->relief_id = $leaveRequestForm->relief_id;
             $leaveRequest->reason = $leaveRequestForm->reason;
             $leaveRequest->save();
@@ -114,35 +133,21 @@ class LeaveRequestController extends Controller
         return response()->json($employees);
     }
 
-    public function update(LeaveUpdateRequestForm $request, int $id)
+    public function canncelLeave(LeaveUpdateRequestForm $request, int $id)
     {
         try {
             $request->validated();
-            $leaveRequest = EmployeeLeave::find($id);
-            if (!$leaveRequest) {
+            $leave = EmployeeLeave::find($id);
+            if (!$leave) {
                 return response()->json(['error' => 'Leave request not found'], 404);
             }
-            if($request->has("leave_type_setting_id")) {
-                $leaveRequest->leave_type_setting_id = $request->leave_type_setting_id;
+            if($leave->leaveStatus->status != "PENDING") {
+                return response()->json(['error' => 'Leave request can only be cancelled when it is in pending status'], 400);
             }
-            if($request->has("leave_option")) {
-                $leaveRequest->leave_option = $request->leave_option;
-            }
-            if($request->has("relief_id")) {
-                $leaveRequest->relief_id = $request->relief_id;
-            }
-            if($request->has("reason")) {
-                $leaveRequest->reason = $request->reason;
-            }
-            if($request->has("fromDate")) {
-                $leaveRequest->fromDate = $request->fromDate;
-            }
-            if($request->has("toDate")) {
-                $leaveRequest->toDate = $request->toDate;
-            }
+            $leave->leaveStatus()->update(['status' => $request->get('leave_status')]);
 
-            $leaveRequest->save();
-            return response()->json($leaveRequest, 200);
+            $leave->save();
+            return response()->json($leave, 200);
         } catch (\Throwable $th) {
             throw new \Exception($th->getMessage());
         }

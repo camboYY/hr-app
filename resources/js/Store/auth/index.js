@@ -1,5 +1,4 @@
-import axios from "axios";
-import { baseUrl } from "../apiEnv";
+import axios from "../axios";
 
 const Auth = {
     namespaced: true,
@@ -18,27 +17,14 @@ const Auth = {
     },
     actions: {
         async userLogin({ commit }, { email, password }) {
-            const { data } = await axios.post(
-                `${baseUrl}auth/login`,
-                { email, password },
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                        Accept: "*/*",
-                    },
-                }
-            );
+            const { data } = await axios.post(`auth/login`, {
+                email,
+                password,
+            });
             commit("SET__LOGIN__DATA", data.access_token);
         },
         async userLogout({ commit }) {
-            await axios.post(`${baseUrl}auth/logout`, null, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem(
-                        "access_token"
-                    )}`,
-                    "Content-Type": "application/json",
-                },
-            });
+            await axios.post(`auth/logout`, null);
             commit("CLEAR_LOGGED_IN_DATA");
         },
     },

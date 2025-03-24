@@ -22,12 +22,7 @@ class LeaveUpdateRequestForm extends FormRequest
     public function rules(): array
     {
         return [
-        'leave_type_setting_id'=> 'nullable|integer',
-        'relief_id'=> 'nullable|integer',
-        'reason'=>"nullable",
-        'fromDate' =>"nullable|date|after_or_equal:today",
-        'toDate' =>"nullable|date|after_or_equal:fromDate",
-        'leave_option'=>"required",
+        'leave_status'=> 'required|string'
         ];
     }
 }
