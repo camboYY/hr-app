@@ -95,7 +95,7 @@ export default {
             loading: false,
             leaveOption: [
                 { label: "Afternoon", value: "AFTERNOON" },
-                { label: "Night", value: "NIGNT" },
+                { label: "Night", value: "NIGHT" },
                 { label: "Morning", value: "MORNING" },
                 { label: "Full Day", value: "FULL" },
             ],

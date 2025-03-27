@@ -7,6 +7,7 @@ const leave = {
         leaveTypes: [],
         employees: [],
         leaves: [],
+        leavePendingApproval: [],
     }),
     mutations: {
         SET_LEAVES(state, leaves) {
@@ -18,8 +19,25 @@ const leave = {
         SET_LEAVE_TYPES(state, leaveTypes) {
             state.leaveTypes = leaveTypes;
         },
+        SET_LEAVES_PENDING_APP(state, leavePendingApproval) {
+            state.leavePendingApproval = leavePendingApproval;
+        },
     },
     actions: {
+        async approvePendingLeave({ dispatch }, { leaveId, status, comment }) {
+            await axios.put(`common/leaves/${leaveId}/approve-request`, {
+                leave_status: status,
+                comment,
+            });
+            dispatch("fetchLeaves");
+        },
+        async fetctPendingLeaveApproval({ commit }) {
+            const { data } = await axios.get(`common/leaves/pending`);
+            commit("SET_LEAVES_PENDING_APP", {
+                data: data.data,
+                total: data.total[0].totalRecords,
+            });
+        },
         async submitLeaveRequest({ dispatch }, leave) {
             await axios.post(`common/leaves/request`, leave);
         },
@@ -70,6 +88,7 @@ const leave = {
         leaves: (state) => state.leaves,
         searchEmployees: (state) => state.employees,
         leaveTypes: (state) => state.leaveTypes,
+        leavePendingApproval: (state) => state.leavePendingApproval,
     },
 };
 

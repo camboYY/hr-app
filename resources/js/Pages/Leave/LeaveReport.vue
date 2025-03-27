@@ -21,6 +21,20 @@
                             debounce="300"
                         ></v-date-input>
                     </div>
+                    <div class="d-flex flex-row flex-wrap">
+                        <v-btn
+                            color="green"
+                            v-if="leavePendingApproval?.data?.length > 0"
+                            @click="checkPendingApproval"
+                        >
+                            Leave Pending Approval
+                            <v-badge
+                                color="white"
+                                :content="leavePendingApproval?.data?.length"
+                            >
+                            </v-badge>
+                        </v-btn>
+                    </div>
                     <v-card-title>
                         <v-row>
                             <v-col cols="6">
@@ -165,7 +179,9 @@ export default {
             },
         ],
     }),
-
+    async created() {
+        await this.fetctPendingLeaveApproval();
+    },
     watch: {
         fromDate(fromDate) {
             this.fetchLeaves({
@@ -196,7 +212,7 @@ export default {
         },
     },
     computed: {
-        ...mapGetters("Leave", ["leaves"]),
+        ...mapGetters("Leave", ["leaves", "leavePendingApproval"]),
         leavesData() {
             if (this.leaves?.data?.length === 0) {
                 this.noDataAvailable = "No record found";
@@ -213,7 +229,16 @@ export default {
         },
     },
     methods: {
-        ...mapActions("Leave", ["fetchLeaves", "cancelLeave"]),
+        ...mapActions("Leave", [
+            "fetchLeaves",
+            "cancelLeave",
+            "fetctPendingLeaveApproval",
+        ]),
+        checkPendingApproval() {
+            this.$router.push({
+                name: "leave.pending-approval",
+            });
+        },
         formatDate(newDate) {
             return moment(newDate).format("Y-MM-DD");
         },

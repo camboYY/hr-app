@@ -155,28 +155,66 @@ class LeaveRequestController extends Controller
 
     public function approveRequest(LeaveApproveRequestForm $request, int $id)
     {
-        $request->validated();
-        $leaveRequest = EmployeeLeave::findOrFail($id);
-        if (!$leaveRequest) {
-            return response()->json(['error' => 'Leave request not found'], 404);
+        try {
+            DB::beginTransaction();
+            $request->validated();
+            $leaveRequest = EmployeeLeave::findOrFail($id);
+            if (!$leaveRequest) {
+                return response()->json(['error' => 'Leave request not found'], 404);
+            }
+            $leaveStatus = LeaveStatus::findOrFail($leaveRequest->leave_status_id);
+            $leaveStatus->status = $request->leave_status;
+            $leaveStatus->date = Date::now()->toIso8601String();
+
+            if($request->has("comment")) {
+                $leaveStatus->reason = $request->comment;
+            }
+            $leaveStatus->save();
+
+            $leaveDto = new LeaveDto();
+            $leaveDto->leaveStatus = $request->leave_status;
+            $leaveDto->subjectName = "Dear Everone,";
+            
+            Mail::to($request->user())->send(new LeaveConfirmation($leaveDto));
+
+            return response()->json(null, 200);
+        }catch(\Exception $exception){
+            DB::rollBack();
+            throw new \Exception($exception->getMessage());
+        }finally {
+            DB::commit();
         }
-        $leaveStatus = LeaveStatus::findOrFail($leaveRequest->leave_status_id);
-        $leaveStatus->status = $request->leave_status;
-        $leaveStatus->date = Date::now()->toIso8601String();
+    }
 
-        if($request->has("comment")) {
-            $leaveStatus->reason = $request->comment;
-        }
-        $leaveStatus->save();
+    public function getPendingLeave(Request $request) 
+    {
+        $perPage = $request->get('perPage', 10);  // Default to 10 items per page
+        $offset = $request->get('page',0);
 
-        $leaveDto = new LeaveDto();
-        $leaveDto->leaveStatus = $request->leave_status;
-        $leaveDto->subjectName = "Dear Everone,";
-        
-        Mail::to($request->user())->send(new LeaveConfirmation($leaveDto));
-
-
-        return response()->json(null, 200);
+        $query = "
+            SELECT empleave.id,
+                CONCAT(emp.firstName, ' ', emp.lastName) AS staffName,  
+                empleave.fromDate,
+                empleave.toDate, 
+                empleave.leave_option, 
+                empleave.reason, 
+                lts.leave_type,
+                lts.leave_balance, 
+                CONCAT(e.firstName, ' ', e.lastName) AS reliefName,
+                ls.status 
+            FROM employees AS emp
+            INNER JOIN employee_leaves AS empleave ON emp.id = empleave.employee_id
+            INNER JOIN leave_type_settings AS lts ON lts.id = empleave.leave_type_setting_id
+            INNER JOIN employees AS e ON empleave.relief_id = e.id 
+            INNER JOIN leave_statuses AS ls ON ls.id = empleave.leave_status_id
+            WHERE ls.status = 'PENDING' AND empleave.approver_id = ? ";
+        $bindings[] = auth()->id();
+        $query.= "LIMIT ? OFFSET ?";
+        $bindings[] = $perPage;
+        $bindings[] = $offset;
+        $leaveRequests = DB::select($query, $bindings);
+        $totalRecords = DB::select("SELECT count(*) as totalRecords FROM employee_leaves;");
+        return response()->json(["data"=>$leaveRequests,"total"=> $totalRecords]);
     }
 
     public function edit($id)
