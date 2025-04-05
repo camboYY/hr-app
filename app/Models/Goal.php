@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Goal extends Model
 {
-    protected $fillable = ['title', 'start_date', 'end_date', 'description', 'status' ];
+    protected $fillable = ['title', 'start_date', 'end_date', 'description', 'status' , 'comment', 'weight' ];
 }

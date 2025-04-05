@@ -4,6 +4,7 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignationController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\GoalCategoryController;
+use App\Http\Controllers\GoalController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\LeaveTypeSettingController;
 use Illuminate\Support\Facades\Route;
@@ -59,6 +60,11 @@ Route::group(['middleware'=>'api','prefix'=> 'common'], function () {
         Route::post("/leaves/category", [GoalCategoryController::class, "store"]);
         Route::put("/leaves/category/{id}", [GoalCategoryController::class, "update"]);
         Route::delete("/leaves/category/{id}", [GoalCategoryController::class, "destroy"]);
+
+        Route::post("/leaves/goals",[GoalController::class, "store"]);
+        Route::get("/leaves/goals",[GoalController::class, "index"]);
+        Route::put("/leaves/goals",[GoalController::class, "update"]);
+        Route::delete("/leaves/goals", [GoalController::class, "destroy"]);
     });
 });
 
